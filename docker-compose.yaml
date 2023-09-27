@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  shop-demo-server:
+    build:
+      context: .
+      args:
+        - PORT=${PORT}
+    image: vfomin/shop-demo-server:latest
+    container_name: "shop-demo-server"
+    env_file: .env
+    ports:
+      - 3001:${PORT}

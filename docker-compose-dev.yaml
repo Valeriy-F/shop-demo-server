@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  shop-demo-server:
+    build:
+      context: .
+      dockerfile: ./DockerfileDev
+      args:
+        - PORT=${PORT}
+    image: vfomin/shop-demo-server:dev
+    container_name: "shop-demo-server-dev"
+    volumes:
+      - .:${HOME_DIR}
+    env_file: .env
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    ports:
+      - 3001:${PORT}

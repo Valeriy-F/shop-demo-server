@@ -1,0 +1,22 @@
+ARG HOME_DIR="/var/www"
+ARG PORT=3001
+
+FROM node:19-bullseye-slim as dependencies
+ARG HOME_DIR
+RUN mkdir -p "${HOME_DIR}"
+WORKDIR ${HOME_DIR}
+COPY package*.json ./
+RUN npm install
+
+FROM node:19-bullseye-slim as builder
+ARG HOME_DIR
+ARG PORT
+RUN mkdir -p "${HOME_DIR}"
+WORKDIR ${HOME_DIR}
+COPY --from=dependencies ${HOME_DIR}/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+EXPOSE "${PORT}"
+
+CMD ["npm", "run", "dev"]

@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 
 const HOST = process.env.HOST || '0.0.0.0'
-const PORT = process.env.PORT ? +process.env.PORT: 3001
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001
 
 const app = express()
 

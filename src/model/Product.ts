@@ -1,53 +1,60 @@
 import {
-  CreationOptional,
-  InferAttributes,
-  InferCreationAttributes,
-  Model
-  } from 'sequelize'
+  Column,
+  DataType,
+  Is,
+  IsFloat,
+  Length,
+  Model,
+  Table
+  } from 'sequelize-typescript';
 
-module.exports = (sequelize: any, DataTypes: any) => {
-  class Product extends Model<InferAttributes<Product>, InferCreationAttributes<Product>> {
-    declare id: CreationOptional<number>;
-    declare name: string;
-    declare price: number;
-    declare description?: string;
-    
-    static associate(models: any) {
-      // define association here
+@Table({
+  tableName: 'products',
+  timestamps: false
+})
+export default class Product extends Model {
+  @Column({
+    field: 'id',
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+    primaryKey: true,
+    allowNull: false
+  })
+  id!: number
+
+  @Length({ min: 3 })
+  @Is('ValidUnderscore', value => {
+    if (!new RegExp('^(([a-z])([_\d])*?)+').test(value)) {
+      throw new Error(`Value "${value}" is required to be a valid underscore string`)
     }
-  }
-  
-  Product.init(
-    {
-      id: {
-        field: 'id',
-        type: DataTypes.BIGINT,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
-      },
-      name: {
-        field: 'name',
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-      },
-      price: {
-        field: 'price',
-        type: DataTypes.FLOAT,
-        allowNull: false
-      },
-      description: {
-        field: 'description',
-        type: DataTypes.TEXT
-      }
-    },
-    {
-      sequelize,
-      modelName: 'Product',
-      tableName: 'products'
-    }
-  );
-  
-  return Product;
-};
+  })
+  @Column({
+    field: 'name',
+    type: DataType.STRING,
+    allowNull: false,
+    unique: true
+  })
+  name!: string
+
+  @Length({ min: 3 })
+  @Column({
+    field: 'display_name',
+    type: DataType.STRING,
+    allowNull: false
+  })
+  displayName!: string
+
+  @IsFloat
+  @Column({
+    field: 'price',
+    type: DataType.FLOAT,
+    allowNull: false
+  })
+  price!: number
+
+  @Column({
+    field: 'description',
+    type: DataType.TEXT
+  })
+  description?: string
+}

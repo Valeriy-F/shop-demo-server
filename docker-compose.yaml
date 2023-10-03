@@ -1,13 +1,44 @@
-version: '3'
+version: '3.8'
 
 services:
-  shop-demo-server:
-    build:
-      context: .
-      args:
-        - PORT=${PORT}
-    image: vfomin/shop-demo-server:latest
-    container_name: "shop-demo-server"
-    env_file: .env
+  db:
+    image: postgres
+    container_name: shop_demo_db
+    restart: always
+    environment:
+      POSTGRES_USER: "dbadmin"
+      POSTGRES_PASSWORD: "dbadmin"
+      POSTGRES_DB: "shop-demo"
     ports:
-      - 3001:${PORT}
+      - 5435:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      db:
+        ipv4_address: 172.26.0.24
+
+  shop-demo-server:
+    image: vfomin/shop-demo-server:test
+    container_name: "shop_demo_server_test"
+    restart: always
+    environment:
+      DB_NAME: "shop-demo"
+      WAIT_HOSTS: db:5432
+    ports:
+      - 3001:3001
+    depends_on:
+      - db
+    networks:
+      - db
+
+networks:
+  db:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/24
+          gateway: 172.26.0.1
+
+volumes:
+  db_data:

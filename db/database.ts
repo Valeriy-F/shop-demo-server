@@ -1,13 +1,27 @@
+import * as dotenv from 'dotenv'
+import Product from '../src/model/Product'
 import { Dialect, QueryInterface } from 'sequelize'
 import { Sequelize } from 'sequelize-typescript'
 import { SequelizeStorage, Umzug } from 'umzug'
 
+dotenv.config()
+
 export default class Database {
+    private static instance: Database
+
     public readonly sequelize: Sequelize
     public readonly migrator: Umzug<QueryInterface>
     public readonly seeder: Umzug<QueryInterface>
 
-    constructor() {
+    public static getInstance(): Database {
+        if (!(Database.instance instanceof Database)) {
+            Database.instance = new Database()
+        }
+
+        return Database.instance
+    }
+
+    private constructor() {
         this.sequelize = this.initSequelize()
         this.migrator = this.initMigrator(this.sequelize)
         this.seeder = this.initSeeder(this.sequelize)
@@ -24,20 +38,20 @@ export default class Database {
 
     private initSequelize(): Sequelize {
         return new Sequelize({
-            database: process.env.DATABASE,
+            database: process.env.DB_NAME,
             username: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
             host: process.env.DB_HOST,
             port: Number(process.env.DB_PORT),
             dialect: process.env.DB_DIALECT as Dialect,
-            models: [__dirname + '../src/model'],
+            models: [Product],
         })
     }
     
     private initMigrator(sequelize: Sequelize): Umzug<QueryInterface> {
         return new Umzug({
             migrations: {
-                glob: __dirname + '/migrations/*.ts',
+                glob: __dirname + '/migrations/*.js',
                 resolve: ({ name, path, context }) => {
                     const migration = require(path || '')
                     
@@ -61,7 +75,7 @@ export default class Database {
     private initSeeder(sequelize: Sequelize): Umzug<QueryInterface> {
         return new Umzug({
             migrations: {
-                glob: __dirname + '/seeders/*.ts',
+                glob: __dirname + '/seeders/*.js',
                 resolve: ({ name, path, context }) => {
                     const seeder = require(path || '')
                     

@@ -22,10 +22,14 @@ ARG PORT
 RUN mkdir -p "${HOME_DIR}"
 WORKDIR ${HOME_DIR}
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --omit=dev
 
-COPY --from=builder ${HOME_DIR}/dist ./dist
+COPY --from=builder ${HOME_DIR}/.env ./
+COPY --from=builder ${HOME_DIR}/build ./build
+
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait /wait
+RUN chmod +x /wait
 
 EXPOSE "${PORT}"
 
-CMD ["npm", "run", "start"]
+CMD /wait && npm run start

@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   db:
-    container_name: shop_demo_db
     image: postgres
+    container_name: shop_demo_db
+    restart: always
     environment:
       POSTGRES_USER: "dbadmin"
       POSTGRES_PASSWORD: "dbadmin"
@@ -17,8 +18,9 @@ services:
         ipv4_address: 172.26.0.24
 
   dbadmin:
-    container_name: shop_demo_dbadmin
     image: dpage/pgadmin4
+    container_name: shop_demo_dbadmin
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: "dbadmin@shop-demo.com"
       PGADMIN_DEFAULT_PASSWORD: "dbadmin"
@@ -39,11 +41,13 @@ services:
         - PORT=${PORT}
     image: vfomin/shop-demo-server:dev
     container_name: "shop_demo_server_dev"
+    restart: always
     volumes:
       - .:${HOME_DIR}
     env_file: .env
     environment:
       NODE_ENV: development
+      WAIT_HOSTS: db:5432
     command: npm run dev
     ports:
       - 3001:${PORT}

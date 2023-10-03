@@ -1,9 +1,21 @@
-import db from '../../db/sequelize'
+import Product from '../model/Product'
 
-type Product = typeof db.sequelize.model.Product
+class ProductRepository {
+    async findAll(): Promise<Product[]> {
+        return await Product.findAll({ order: [['name', 'ASC']] })
+    }
 
-export class ProductRepository {
-    async findAll(): Promise<Product> {
-        
+    async findOneByName(name: string): Promise<Product | null> {
+        return await Product.findOne({where: {name}})
+    }
+
+    async save(product: Product): Promise<void> {
+        await product.save()
+    }
+
+    async delete(product: Product): Promise<void> {
+        await product.destroy()
     }
 }
+
+export default new ProductRepository()

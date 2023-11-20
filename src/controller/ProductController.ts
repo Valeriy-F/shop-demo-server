@@ -1,16 +1,18 @@
-import Controller, { HttpCode } from './Controller';
-import FilesUploadException from '../exception/FilesUploadException';
-import ImmutablePropertyException from '../exception/ImmutablePropertyException';
-import MissedRequiredPropertiesException from '../exception/MissedRequiredPropertiesException';
-import NotFoundException from '../exception/NotFoundException';
-import RestException from '../exception/RestException';
-import Product from '../model/Product';
-import ProductRepository from '../repository/ProductRepository';
-import { Product as RestProduct, ProductResponse as RestProductResponse } from '../rest-model/product-model';
-import ProductFilesService from '../service/ProductFilesService';
-import ProductFilesUploaderProvider from '../service/ProductFilesUploaderProvider';
-import { Request, Response } from 'express';
-import { MulterError } from 'multer';
+import Controller, { HttpCode } from './Controller'
+import FilesUploadException from '../exception/FilesUploadException'
+import ImmutablePropertyException from '../exception/ImmutablePropertyException'
+import MissedRequiredPropertiesException from '../exception/MissedRequiredPropertiesException'
+import NotFoundException from '../exception/NotFoundException'
+import RestException from '../exception/RestException'
+import Product from '../model/Product'
+import ProductFile from '../model/ProductFile'
+import ProductFileRepository from '../repository/ProductFileRepository'
+import ProductRepository from '../repository/ProductRepository'
+import { Product as RestProduct, ProductResponse as RestProductResponse } from '../rest-model/product-model'
+import ProductFilesService from '../service/ProductFilesService'
+import ProductFilesUploaderProvider from '../service/ProductFilesUploaderProvider'
+import { Request, Response } from 'express'
+import { MulterError } from 'multer'
 
 class ProductController extends Controller {
     private readonly productFilesService: ProductFilesService;
@@ -102,26 +104,70 @@ class ProductController extends Controller {
                 _this.handleFileUploadError(err)
             } catch (error: any) {
                 _this.handleErrorResponse(res, error);
+
+                return;
             }
 
-            _this.handleResponse<string>(
+            const file = req.file;
+
+            if (file) {
+                const prevImageFile = product.getImageFile();
+
+                if (prevImageFile) {
+                    try {
+                        await _this.productFilesService.deleteProductImageFile(product);
+                    } catch (error: any) {
+                        console.error(`Failed to delete from storage previous image file "${prevImageFile.name}".`);
+                    }
+
+                    try {
+                        await ProductFileRepository.delete(prevImageFile);
+                    } catch (error: any) {
+                        console.error(`Failed to delete from DB previous image file "${prevImageFile.name}".`);
+                    }
+                }
+
+                const productFile = ProductFile.createImage(file.filename, product);
+
+                try {
+                    await ProductFileRepository.save(productFile);
+                } catch (error: any) {
+                    _this.productFilesService.deleteProductImageFile(product);
+                    _this.handleErrorResponse(res, error);
+
+                    return;
+                }
+            }
+
+            _this.handleResponse<RestProduct>(
                 res,
                 HttpCode.Ok,
-                await _this.productFilesService.getProductImageFileURL(product)
+                await _this.modelToRestResponseModel(product, new RestProductResponse())
             );
         })
     }
 
     async delete(req: Request, res: Response): Promise<void> {
+        let product;
+
         try {
-            const product = await this.getProductByRequest(req);
+            product = await this.getProductByRequest(req);
 
-            await ProductRepository.delete(product)
-
-            this.handleResponse<string>(res, HttpCode.Ok, `Successfully deleted product "${product.name}"`)
+            await ProductRepository.delete(product);
         } catch (error: any) {
-            this.handleErrorResponse(res, error)
+            this.handleErrorResponse(res, error);
+
+            return;
         }
+
+        try {
+            await this.productFilesService.deleteProductFilesDir(product);
+        } catch (error) {
+            console.error(`Failed to delete files directory for product "${product.name}".`)
+        }
+
+
+        this.handleResponse<string>(res, HttpCode.Ok, `Successfully deleted product "${product.name}"`);
     }
 
     private handleFileUploadError(error: any, fileName = 'unknown file') {
@@ -156,7 +202,6 @@ class ProductController extends Controller {
             "name",
             "displayName",
             "price",
-            "description"
         ]
         const missedProperties: string[] = requiredProperties.filter(property => (validatableObject[property] === undefined))
 

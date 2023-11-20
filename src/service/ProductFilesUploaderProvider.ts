@@ -3,6 +3,7 @@ import Product from '../model/Product';
 import { createDirIfNotExists } from '../utils/file-service';
 import { RequestHandler } from 'express';
 import multer from 'multer';
+import path from 'path';
 
 export default class ProductFilesUploaderProvider {
     private readonly productFilesService: ProductFilesService;
@@ -21,10 +22,12 @@ export default class ProductFilesUploaderProvider {
                 cb(null, destinationDir);
             },
             filename: function (req, file, cb) {
-                cb(null, 'image.jpg');
+                const ext = path.extname(file.originalname);
+
+                cb(null, `image-${new Date().getTime()}${ext}`);
             }
         })
 
-        return multer({storage}).single('image')
+        return multer({ storage }).single('image');
     }
 }

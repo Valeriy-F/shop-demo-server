@@ -1,6 +1,8 @@
+import ProductFile, { TProductFile } from './ProductFile';
 import {
   Column,
   DataType,
+  HasMany,
   Is,
   IsFloat,
   Length,
@@ -20,7 +22,7 @@ export default class Product extends Model {
     primaryKey: true,
     allowNull: false
   })
-  id!: number
+  id!: string
 
   @Length({ min: 3 })
   @Is('ValidUnderscore', value => {
@@ -57,4 +59,40 @@ export default class Product extends Model {
     type: DataType.TEXT
   })
   description?: string
+
+  @HasMany(() => ProductFile, {
+    onDelete: 'cascade',
+    hooks: true
+  })
+  _files!: ProductFile[];
+
+  get files(): ProductFile[] {
+    if (!this._files) {
+      this._files = [];
+    }
+
+    return this._files;
+  }
+
+  addFile(file: ProductFile) {
+    if (file.type === 'image') {
+      this._files = this.files.filter(file => file.type !== 'image');
+    }
+
+    this.files.push(file);
+  }
+
+  getFiles(type?: TProductFile): ProductFile[] {
+    if (type) {
+      return this.files.filter(file => file.type === type);
+    }
+
+    return this.files;
+  }
+
+  getImageFile(): ProductFile | null {
+    const files = this.getFiles('image')
+
+    return files.length ? files[0] : null;
+  }
 }

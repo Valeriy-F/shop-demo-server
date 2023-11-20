@@ -1,8 +1,9 @@
-import * as dotenv from 'dotenv'
-import Product from '../src/model/Product'
-import { Dialect, QueryInterface } from 'sequelize'
-import { Sequelize } from 'sequelize-typescript'
-import { SequelizeStorage, Umzug } from 'umzug'
+import Product from '../src/model/Product';
+import ProductFile from '../src/model/ProductFile';
+import * as dotenv from 'dotenv';
+import { Dialect, QueryInterface } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
+import { SequelizeStorage, Umzug } from 'umzug';
 
 dotenv.config()
 
@@ -44,17 +45,17 @@ export default class Database {
             host: process.env.DB_HOST,
             port: Number(process.env.DB_PORT),
             dialect: process.env.DB_DIALECT as Dialect,
-            models: [Product],
+            models: [Product, ProductFile],
         })
     }
-    
+
     private initMigrator(sequelize: Sequelize): Umzug<QueryInterface> {
         return new Umzug({
             migrations: {
                 glob: __dirname + '/migrations/*.js',
                 resolve: ({ name, path, context }) => {
                     const migration = require(path || '')
-                    
+
                     return {
                         name,
                         up: async () => migration.up(context, sequelize.Sequelize),
@@ -78,7 +79,7 @@ export default class Database {
                 glob: __dirname + '/seeders/*.js',
                 resolve: ({ name, path, context }) => {
                     const seeder = require(path || '')
-                    
+
                     return {
                         name,
                         up: async () => seeder.up(context, sequelize.Sequelize),

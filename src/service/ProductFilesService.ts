@@ -11,26 +11,37 @@ export default class ProductFilesService {
     private static readonly PRODUCT_FILES_FOLDER = 'products';
     private static readonly PRODUCT_FILES_DIR = path.join(PUBLIC_DIR, ProductFilesService.PRODUCT_FILES_FOLDER);
     private static readonly DEFUALT_PRODUCT_IMAGE_FILE = 'image-default.jpg';
-    private static readonly PRODUCT_IMAGE_FILE = 'image.jpg';
 
     getProductFilesDir(product: Product): string {
         return path.join(ProductFilesService.PRODUCT_FILES_DIR, product.name);
     }
 
-    async deleteProductFileDir(product: Product) {
+    async deleteProductFilesDir(product: Product) {
         await deleteFileOrDir(path.join(this.getProductFilesDir(product)));
     }
 
     async deleteProductImageFile(product: Product) {
-        await deleteFileOrDir(path.join(this.getProductFilesDir(product), ProductFilesService.PRODUCT_IMAGE_FILE))
+        const productFile = product.getImageFile();
+
+        if (!productFile) {
+            return;
+        }
+        console.log(path.join(this.getProductFilesDir(product), productFile.name))
+        await deleteFileOrDir(path.join(this.getProductFilesDir(product), productFile.name))
     }
 
     async getProductImageFileURL(product: Product): Promise<string> {
-        const storageImagePath = path.join(this.getProductFilesDir(product), ProductFilesService.PRODUCT_IMAGE_FILE);
+        const productFile = product.getImageFile();
 
-        const urlImagePath = await isExists(storageImagePath)
-            ? path.join(product.name, ProductFilesService.PRODUCT_IMAGE_FILE)
-            : ProductFilesService.DEFUALT_PRODUCT_IMAGE_FILE
+        let urlImagePath = ProductFilesService.DEFUALT_PRODUCT_IMAGE_FILE;
+
+        if (productFile) {
+            const storageImagePath = path.join(this.getProductFilesDir(product), productFile.name);
+
+            if (await isExists(storageImagePath)) {
+                urlImagePath = path.join(product.name, productFile.name);
+            }
+        }
 
         return path.join(BASE_URL, ProductFilesService.PRODUCT_FILES_FOLDER, urlImagePath)
     }

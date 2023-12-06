@@ -1,7 +1,14 @@
-import ProductRouter from './routes/ProductRouter';
-import Database from '../db/database';
-import cors from 'cors';
-import express, { Application } from 'express';
+import Controller from './controller/Controller'
+import NotFoundException from './exception/NotFoundException'
+import ProductRouter from './routes/ProductRouter'
+import Database from '../db/database'
+import cors from 'cors'
+import express, {
+    Application,
+    NextFunction,
+    Request,
+    Response
+    } from 'express'
 
 export default class App {
     private readonly app: Application
@@ -36,5 +43,8 @@ export default class App {
 
     private initRoutes(): void {
         this.app.use("/api/products", ProductRouter)
+        this.app.use(function (req: Request, res: Response, next: NextFunction) {
+            Controller.handleErrorResponse(res, new NotFoundException('Page is not found'))
+        })
     }
 }

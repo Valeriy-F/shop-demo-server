@@ -1,4 +1,4 @@
-import Controller, { HttpCode } from './Controller'
+import { Controller, HttpCode } from './Controller'
 import FilesUploadException from '../exception/FilesUploadException'
 import ImmutablePropertyException from '../exception/ImmutablePropertyException'
 import MissedRequiredPropertiesException from '../exception/MissedRequiredPropertiesException'

@@ -1,17 +1,17 @@
-import FilesUploadException from '../exception/FilesUploadException';
-import ImmutablePropertyException from '../exception/ImmutablePropertyException';
-import MissedRequiredPropertiesException from '../exception/MissedRequiredPropertiesException';
-import NotFoundException from '../exception/NotFoundException';
-import RestException from '../exception/RestException';
-import { Response } from 'express';
-import path from 'path';
-import { ValidationError, ValidationErrorItem } from 'sequelize';
+import FilesUploadException from '../exception/FilesUploadException'
+import ImmutablePropertyException from '../exception/ImmutablePropertyException'
+import MissedRequiredPropertiesException from '../exception/MissedRequiredPropertiesException'
+import NotFoundException from '../exception/NotFoundException'
+import RestException from '../exception/RestException'
+import { Response } from 'express'
+import path from 'path'
+import { ValidationError, ValidationErrorItem } from 'sequelize'
 
-export default class Controller {
+export class Controller {
     protected static readonly PUBLIC_DIR = 'public';
     protected static readonly PUBLIC_IMAGES_DIR = path.join(Controller.PUBLIC_DIR, 'images');
 
-    protected handleErrorResponse(res: Response, error: Error): void {
+    public handleErrorResponse(res: Response, error: Error): void {
         let responseInfo: ResponseInfo<null>
 
         if (error instanceof ImmutablePropertyException) {
@@ -78,3 +78,5 @@ export class ResponseError {
         this.message = message
     }
 }
+
+export default new Controller()

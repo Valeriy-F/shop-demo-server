@@ -18,8 +18,8 @@ services:
         ipv4_address: 172.26.0.24
 
   shop-demo-server:
-    image: vfomin/shop-demo-server:test
-    container_name: "shop_demo_server_test"
+    image: vfomin/shop-demo-server:prod
+    container_name: "shop_demo_server"
     restart: always
     environment:
       DB_NAME: "shop-demo"

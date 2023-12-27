@@ -1,5 +1,5 @@
 ARG HOME_DIR="/var/www"
-ARG PORT=3000
+ARG PORT=3001
 
 FROM node:19-bullseye-slim as dependencies
 ARG HOME_DIR
@@ -26,6 +26,7 @@ RUN npm ci --omit=dev
 
 COPY --from=builder ${HOME_DIR}/.env ./
 COPY --from=builder ${HOME_DIR}/build ./build
+COPY --from=builder ${HOME_DIR}/public/products ./public/products
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait /wait
 RUN chmod +x /wait

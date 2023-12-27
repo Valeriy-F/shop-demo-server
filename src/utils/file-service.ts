@@ -1,4 +1,7 @@
-import { access, mkdir, rm } from 'fs/promises';
+import * as dotenv from 'dotenv'
+import { access, mkdir, rm } from 'fs/promises'
+
+dotenv.config()
 
 const BASE_URL = process.env.BASE_URL as string;
 const PUBLIC_DIR = process.env.PUBLIC_DIR as string;

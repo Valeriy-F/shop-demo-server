@@ -31,7 +31,7 @@ export default class App {
                 console.log(`Server running on port http://${host}:${port}`)
             })
         } catch (error) {
-            console.error('Failed to run application', error);
+            console.error('Failed to run application', error)
         }
     }
 

@@ -35,6 +35,8 @@ export class Controller {
                 return new ResponseError(errorItem.message, errorItem.path)
             })
         } else {
+            console.log('!!! [Unknown Error]: ', error.message)
+            console.log('!!! [Error Stack]: ', error.stack)
             responseInfo = new ResponseInfo(HttpCode.InternalServerError)
         }
 

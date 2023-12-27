@@ -1,11 +1,11 @@
-import Product from '../model/Product';
+import Product from '../model/Product'
 import {
     BASE_URL,
     deleteFileOrDir,
     isExists,
     PUBLIC_DIR
-    } from '../utils/file-service';
-import path from 'path';
+    } from '../utils/file-service'
+import path from 'path'
 
 export default class ProductFilesService {
     private static readonly PRODUCT_FILES_FOLDER = 'products';
@@ -26,7 +26,7 @@ export default class ProductFilesService {
         if (!productFile) {
             return;
         }
-        console.log(path.join(this.getProductFilesDir(product), productFile.name))
+
         await deleteFileOrDir(path.join(this.getProductFilesDir(product), productFile.name))
     }
 

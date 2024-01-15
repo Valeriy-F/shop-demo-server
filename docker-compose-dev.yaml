@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    container_name: shop_demo_db
+    restart: always
+    environment:
+      POSTGRES_USER: "dbadmin"
+      POSTGRES_PASSWORD: "dbadmin"
+      POSTGRES_DB: "shop-demo"
+    ports:
+      - "5435:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      db:
+        ipv4_address: 172.26.0.24
+
+  dbadmin:
+    image: dpage/pgadmin4
+    container_name: shop_demo_dbadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "dbadmin@shop-demo.com"
+      PGADMIN_DEFAULT_PASSWORD: "dbadmin"
+    volumes:
+      - db_admin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - db
+
+  shop-demo-server:
+    build:
+      context: .
+      dockerfile: ./DockerfileDev
+      args:
+        - PORT=${PORT}
+    image: vfomin/shop-demo-server:dev
+    container_name: "shop_demo_server_dev"
+    restart: always
+    volumes:
+      - .:${HOME_DIR}
+    env_file: .env
+    environment:
+      NODE_ENV: development
+      WAIT_HOSTS: db:5432
+    command: npm run dev
+    ports:
+      - 3001:${PORT}
+    depends_on:
+      - db
+    networks:
+      - db
+
+networks:
+  db:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.26.0.0/24
+          gateway: 172.26.0.1
+
+volumes:
+  db_data:
+  db_admin:

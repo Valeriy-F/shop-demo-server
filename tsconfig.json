@@ -1,43 +1,22 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "lib": [
-            "es6"
-        ],
+        "target": "es6",
         "allowJs": true,
         "strict": true,
         "sourceMap": false,
-        "outDir": "./dist",
+        "outDir": "./build",
         "module": "commonjs",
         "skipLibCheck": true,
         "noImplicitAny": true,
         "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "moduleResolution": "node",
-        "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "forceConsistentCasingInFileNames": true,
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules",
-                "src/*"
-            ]
-        },
-        "plugins": [
-            {
-                "transform": "typescript-transform-paths",
-                "exclude": [
-                    "**/node_modules/**"
-                ]
-            }
-        ]
+        "emitDecoratorMetadata": true
     },
     "exclude": [
         "node_modules"
     ],
     "include": [
-        "./src/**/*"
+        "./src/**/*",
+        "./db/**/*",
     ]
 }
